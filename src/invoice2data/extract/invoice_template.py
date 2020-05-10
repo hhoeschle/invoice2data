@@ -178,14 +178,20 @@ class InvoiceTemplate(OrderedDict):
                     res_find = re.findall(v, optimized_str)
                 if res_find:
                     logger.debug("res_find=%s", res_find)
-                    if k.startswith("date") or k.endswith("date"):
+                    if "date_fields" not in self.keys():
+                        self["date_fields"] = []
+                    if "value_fields" not in self.keys():
+                        self["value_fields"] = []
+
+                    if k.startswith("date") or k.endswith("date") or k in self["date_fields"]:
                         output[k] = self.parse_date(res_find[0])
                         if not output[k]:
                             logger.error(
                                 "Date parsing failed on date '%s'", res_find[0]
                             )
                             return None
-                    elif k.startswith("amount"):
+
+                    elif k.startswith("amount") or k in self["value_fields"]:
                         if sum_field:
                             output[k] = 0
                             for amount_to_parse in res_find:
